@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>轮播图</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <style>
+        *{margin: 0;padding: 0;}
+        div.xx{
+            overflow: hidden;
+            margin: 0 auto;
+            position: relative;
+        }
+        ol{
+            list-style-type: none;
+            display: flex;
+            transition: all 0.5s;
+        }
+        ol>li>img{
+            vertical-align: top;
+        }
+        button.pagerBtn{
+            position: absolute;
+            top: 50%;
+            transform:translateY(-50%);
+            cursor: pointer;
+        }
+        button.pagerBtn:nth-child(1){
+            left: 0;
+        }
+        button.pagerBtn:nth-child(2){
+            right: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="xx">
+        <ol>
+            <li><img src="./pictures/轮播图/轮播1.PNG" alt="轮播图" width="400px"></li>
+            <li><img src="./pictures/轮播图/轮播2.PNG" alt="轮播图" width="400px"></li>
+            <li><img src="./pictures/轮播图/轮播3.PNG" alt="轮播图" width="400px"></li>
+        </ol> 
+    </div>
+
+    <script>
+        class Slide{
+            constructor(options){
+                this.options = options
+                this.innerval = options.interval
+                this.element = $(options.element)
+
+                this.init()
+                this.play()
+                this.autoPlay()
+                this.controls()
+                this.pager()
+            }
+            init(){
+                this.imgAmount = $(this.options.element).children('ol').children('li').length
+                this.imgWidth = $(this.options.element).children('ol').children('li').eq(0).children('img').width()
+                this.element.width(this.imgWidth)
+                this.index = 0
+                this.timer
+                this.previousBtn = $('<button class="pagerBtn">前一张</button>')
+                this.nextBtn = $('<button class="pagerBtn">后一张</button>')
+                this.element.append(this.nextBtn)
+                this.element.append(this.previousBtn)
+            }
+            play(){
+                if(this.index>=this.imgAmount){
+                    this.index = 0
+                }
+                if(this.index<0){
+                    this.index = this.imgAmount-1
+                }
+                this.element.children('ol').css({'transform':`translateX(${-this.index*this.imgWidth}px)`})
+            }
+            autoPlay(){
+                if(this.options.autoPlay){
+                    let interval = this.innerval
+                    this.timer = setInterval(()=>{
+                        this.index = this.index+1
+                        if(this.index>=this.imgAmount){
+                            this.index = 0
+                        }
+                        this.play()
+                    },interval)
+                }
+            }
+            controls(){
+                if(this.options.controls){
+                    this.element.on('mouseenter',()=>{
+                        window.clearInterval(this.timer)
+                    })
+                    this.element.on('mouseleave',()=>{
+                        this.autoPlay()
+                    })
+                }
+            }
+            pager(){
+                if(this.options.pager){
+                    this.previousBtn.on('click',()=>{
+                        this.index = this.index-1
+                        if(this.index<0){
+                            this.index = this.imgAmount
+                        }
+                        this.play()
+                    })
+                    this.nextBtn.on('click',()=>{
+                        this.index = this.index+1
+                        if(this.index>=this.imgAmount){
+                            this.index = 0
+                        }
+                        this.play()
+                    })
+                }
+            }
+        }
+        new Slide({
+            element:'.xx',
+            interval:500,
+            autoPlay:true,
+            controls:true,
+            pager:true
+        })
+    </script>
+</body>
+</html>

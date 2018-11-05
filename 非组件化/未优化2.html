@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>轮播组件优化</title>
+    <style>
+        *{margin: 0;padding: 0;}
+        .slideWindow{
+            border: 5px solid black;
+            margin: 0 auto;
+            position: relative;
+        }
+        .slideWindow>ol{
+            list-style-type: none;
+            display: flex;     
+        }
+        .slideWindow>ol img{
+            vertical-align: top;
+            width: 400px;
+            height: 400px;
+        }
+        .previousButton{
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%)
+        }
+        .nextButton{
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%)
+        }
+    </style>
+</head>
+<body>
+    <div class="slideWindow zhang-slide">
+        <ol>
+            <li><img src="./pictures/轮播图/轮播1.PNG" alt="轮播图"></li>
+            <li><img src="./pictures/轮播图/轮播2.PNG" alt="轮播图"></li>
+            <li><img src="./pictures/轮播图/轮播3.PNG" alt="轮播图"></li>
+            <li><img src="./pictures/轮播图/轮播4.PNG" alt="轮播图"></li>
+            <li><img src="./pictures/轮播图/轮播5.PNG" alt="轮播图"></li>
+        </ol>
+    </div>
+
+    <script>
+        class Slide{
+            constructor(options){
+                this.options = options
+                this.slideWindow = document.querySelector(options.element)
+                this.init()
+            }
+            init(){
+                this.index = 0
+                this.timer
+
+                this.slideWrapper = this.slideWindow.querySelector('ol')
+                this.slideImg = this.slideWindow.querySelectorAll('li>img')
+                this.slideImgAmount = this.slideImg.length
+
+                this.slideImgWidth = getComputedStyle(this.slideImg[0],null).width
+                this.slideImgHeight = getComputedStyle(this.slideImg[0],null).height
+                this.slideWindow.style.cssText = `width:${this.slideImgWidth}; height:${this.slideImgHeight}`
+
+                let previousButton = document.createElement('button')
+                let nextButton = document.createElement('button')
+                previousButton.innerText = '前一张'
+                nextButton.innerText = '后一张'
+                previousButton.classList.add('previousButton')
+                nextButton.classList.add('nextButton')
+                this.slideWindow.appendChild(previousButton)
+                this.slideWindow.appendChild(nextButton)
+                this.previousButton = previousButton
+                this.nextButton = nextButton
+
+                this.play()
+                this.autoPlay()
+                this.hasControlStartAndStop()
+                this.hasControlPreviousAndNext()
+            }
+            play(){
+                if(this.index >= this.slideImgAmount){
+                    this.index = 0
+                }else if(this.index < 0){
+                    this.index = this.slideImgAmount-1
+                }
+                this.slideWrapper.style.transform = `translateX(${-this.index * ( this.slideImgWidth.slice(0,3)-0 )}px)`
+            }
+            autoPlay(){
+                if(this.options.isAutoPlay){
+                    this.timer = setInterval(()=>{
+                        this.index += 1
+                        this.play()
+                    }, this.options.slideSpeed)
+                }
+            }
+            hasControlStartAndStop(){
+                if(this.options.hasControlStartAndStop){
+                    this.slideWindow.addEventListener('mouseenter', ()=>{
+                        window.clearInterval(this.timer)
+                    })
+                    this.slideWindow.addEventListener('mouseleave', ()=>{
+                        this.timer = setInterval(()=>{
+                            this.index += 1
+                            this.play()
+                        }, this.options.slideSpeed)
+                    })
+                }
+            }
+            hasControlPreviousAndNext(){
+                if(this.options.hasControlPreviousAndNext){
+                    this.previousButton.addEventListener('click', ()=>{
+                        this.index -=1
+                        this.play()
+                    })
+                    this.nextButton.addEventListener('click', ()=>{
+                        this.index +=1
+                        this.play()
+                    })
+                }
+            }
+        }
+
+        new Slide({
+            element: '.zhang-slide',
+            slideSpeed: '500',
+            isAutoPlay: true,
+            hasControlStartAndStop: true,
+            hasControlPreviousAndNext: true
+        })
+    </script>
+</body>
+</html>
